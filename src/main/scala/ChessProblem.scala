@@ -1,10 +1,10 @@
 object ChessProblem {
 
-  final private val KINGS = "K"
-  final private val QUEENS = "Q"
-  final private val BISHOPS = "B"
-  final private val ROOKS = "R"
-  final private val KNIGHTS = "Kn"
+  final private val KINGS = 0
+  final private val QUEENS = 1
+  final private val BISHOPS = 2
+  final private val ROOKS = 3
+  final private val KNIGHTS = 4
 
   def main(args: Array[String]) = {
     def read() = Console.readInt()
@@ -26,16 +26,16 @@ object ChessProblem {
     println(result)
   }
 
-  class PieceState(val piecesLeft: Map[String, Int], val piecesOnTheBoard: List[Piece] = List()) {
+  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List()) {
     def anyPiecesLeft(): Boolean =
       List(KINGS, QUEENS, BISHOPS, ROOKS, KNIGHTS).exists(piecesLeft(_) != 0)
 
     def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
-      this(Map(KINGS -> kings, QUEENS -> queens, BISHOPS -> bishops, ROOKS -> rooks, KNIGHTS -> knights), List())
+      this(Array(kings, queens, bishops, rooks, knights), List())
 
     def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard)
 
-    def changePiecesLeft(f: (Map[String, Int] => Map[String, Int])): PieceState =
+    def changePiecesLeft(f: (Array[Int] => Array[Int])): PieceState =
       new PieceState(f(piecesLeft), piecesOnTheBoard)
   }
 
@@ -46,7 +46,11 @@ object ChessProblem {
   private def isAfter(coord1: (Int, Int), coord2: (Int, Int)): Boolean =
     coord1._1 > coord2._1 || (coord1._1 == coord2._1 && coord1._2 > coord2._2)
 
-  private def remove(n: String) = (m: Map[String, Int]) => m + (n -> (m(n) - 1))
+  private def remove(n: Int) = (m: Array[Int]) => {
+    val nArr = m.clone()
+    nArr(n) -= 1
+    nArr
+  }
 
   private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPiece: Piece): Int = {
     (for {

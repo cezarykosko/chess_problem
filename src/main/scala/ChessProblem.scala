@@ -22,21 +22,10 @@ object ChessProblem {
         j <- 1 to vertical
       } yield (i, j)
 
-    val result = backtrack(chessboard, new PieceState(kings, queens, bishops, rooks, knights))
+    val count = kings + queens + bishops + rooks + knights
+
+    val result = backtrack(chessboard, Array(kings, queens, bishops, rooks, knights), count, List())//new PieceState(kings, queens, bishops, rooks, knights))
     println(result)
-  }
-
-  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
-    def anyPiecesLeft(): Boolean =
-      count > 0
-
-    def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
-      this(Array(kings, queens, bishops, rooks, knights), List(), kings + queens + bishops + rooks + knights)
-
-    def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
-
-    def changePiecesLeft(f: (Array[Int] => Array[Int])): PieceState =
-      new PieceState(f(piecesLeft), piecesOnTheBoard, count - 1) //TODO: incorrect name -> logic
   }
 
   //TODO: rename
@@ -52,41 +41,41 @@ object ChessProblem {
     nArr
   }
 
-  private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPiece: Piece): Int = {
+  private def place_piece(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, piecesOnTheBoard: List[Piece], newPiece: Piece): Int = {
     (for {
       coords <- fields
     } yield {
         newPiece.coords = coords
-        if (state.piecesOnTheBoard exists ((p: Piece) => newPiece.beats(p) || isAfter(newPiece, p)))
+        if (piecesOnTheBoard exists ((p: Piece) => newPiece.beats(p) || isAfter(newPiece, p)))
           0
         else
-          backtrack(fields filter (!newPiece.beats(_)), state.addPieceToTheBoard(newPiece))
+          backtrack(fields filter (!newPiece.beats(_)), piecesLeft, sparePiecesCount, newPiece :: piecesOnTheBoard)
       }).sum
   }
 
   // assuming there's available fields & pieces
-  private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    if (state.piecesLeft(QUEENS) != 0)
-      place_piece(fields, state changePiecesLeft remove(QUEENS), new Queen)
-    else if (state.piecesLeft(ROOKS) != 0)
-      place_piece(fields, state changePiecesLeft remove(ROOKS), new Rook)
-    else if (state.piecesLeft(BISHOPS) != 0)
-      place_piece(fields, state changePiecesLeft remove(BISHOPS), new Bishop)
-    else if (state.piecesLeft(KINGS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KINGS), new King)
-    else if (state.piecesLeft(KNIGHTS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KNIGHTS), new Knight)
+  private def backtrack_step(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, piecesOnTheBoard: List[Piece]): Int = {
+    if (piecesLeft(QUEENS) != 0)
+      place_piece(fields, remove(QUEENS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, new Queen)
+    else if (piecesLeft(ROOKS) != 0)
+      place_piece(fields, remove(ROOKS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, new Rook)
+    else if (piecesLeft(BISHOPS) != 0)
+      place_piece(fields, remove(BISHOPS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, new Bishop)
+    else if (piecesLeft(KINGS) != 0)
+      place_piece(fields, remove(KINGS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, new King)
+    else if (piecesLeft(KNIGHTS) != 0)
+      place_piece(fields, remove(KNIGHTS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, new Knight)
     else
       1
   }
 
-  private def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int = {
+  private def backtrack(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, piecesOnTheBoard: List[Piece]): Int = {
     //println(fields)
-    if (!state.anyPiecesLeft())
+    if (sparePiecesCount == 0)
       1
     else if (fields.isEmpty)
       0
-    else backtrack_step(fields, state)
+    else backtrack_step(fields, piecesLeft, sparePiecesCount, piecesOnTheBoard)
   }
 }
 

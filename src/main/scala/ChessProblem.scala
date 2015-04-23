@@ -9,7 +9,7 @@ object ChessProblem {
       l <- 1 to 12 //as above
       m <- 1 to 11 //king - as above
       n <- 1 to 10 //as above
-      o <- 1 to 9  //knight
+      o <- 1 to 9 //knight
     } {}
   }
 }

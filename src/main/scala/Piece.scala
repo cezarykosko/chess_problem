@@ -18,31 +18,27 @@ sealed abstract class Piece(var coords: (Int, Int)) {
     distHorizontal(coords) == distVertical(coords)
 }
 
-case class King extends Piece(0,0) {
+case class King extends Piece(0, 0) {
   override def beats(coords: (Int, Int)): Boolean =
-    Math.max(this.distHorizontal(coords),this.distVertical(coords)) <= 1
+    Math.max(this.distHorizontal(coords), this.distVertical(coords)) <= 1
 }
 
-case class Queen extends Piece(0,0) {
+case class Queen extends Piece(0, 0) {
   override def beats(coords: (Int, Int)): Boolean =
     diagonalBeats(coords) || straightBeats(coords)
 }
 
-case class Bishop extends Piece(0,0) {
+case class Bishop extends Piece(0, 0) {
   override def beats(coords: (Int, Int)) = diagonalBeats(coords)
 }
 
-case class Rook extends Piece(0,0) {
+case class Rook extends Piece(0, 0) {
   override def beats(coords: (Int, Int)) = straightBeats(coords)
 }
 
-case class Knight extends Piece(0,0) {
+case class Knight extends Piece(0, 0) {
   override def beats(coords: (Int, Int)) = {
     val dists = (this.distHorizontal(coords), this.distVertical(coords))
     dists ==(0, 0) || dists ==(2, 1) || dists ==(1, 2)
   }
 }
-
-
-
-

@@ -36,7 +36,7 @@ object ChessProblem {
     def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
 
     def changePiecesLeft(f: (Array[Int] => Array[Int])): PieceState =
-      new PieceState(f(piecesLeft), piecesOnTheBoard, count - 1)
+      new PieceState(f(piecesLeft), piecesOnTheBoard, count - 1) //TODO: incorrect name -> logic
   }
 
   //TODO: rename

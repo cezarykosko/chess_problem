@@ -54,21 +54,21 @@ object ChessProblem {
   // assuming there's available fields & pieces
   private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState) : Int = {
     if (state.piecesLeft(QUEENS) != 0)
-      place_piece(fields, state changePiecesLeft remove(QUEENS), new Queen)
+      place_piece(fields, state changePiecesLeft remove(QUEENS), new Queen) / state.piecesLeft(QUEENS)
     else if (state.piecesLeft(ROOKS) != 0)
-      place_piece(fields, state changePiecesLeft remove(ROOKS), new Rook)
+      place_piece(fields, state changePiecesLeft remove(ROOKS), new Rook) / state.piecesLeft(ROOKS)
     else if (state.piecesLeft(BISHOPS) != 0)
-      place_piece(fields, state changePiecesLeft remove(BISHOPS), new Bishop)
+      place_piece(fields, state changePiecesLeft remove(BISHOPS), new Bishop) / state.piecesLeft(BISHOPS)
     else if (state.piecesLeft(KINGS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KINGS), new King)
+      place_piece(fields, state changePiecesLeft remove(KINGS), new King) / state.piecesLeft(KINGS)
     else if (state.piecesLeft(KNIGHTS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KNIGHTS), new Knight)
+      place_piece(fields, state changePiecesLeft remove(KNIGHTS), new Knight) / state.piecesLeft(KNIGHTS)
     else
       1
   }
 
   private def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    println(fields)
+    //println(fields)
     if (!state.anyPiecesLeft())
       1
     else if (fields.isEmpty)

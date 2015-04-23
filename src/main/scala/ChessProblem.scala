@@ -26,17 +26,17 @@ object ChessProblem {
     println(result)
   }
 
-  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List()) {
+  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
     def anyPiecesLeft(): Boolean =
-      List(KINGS, QUEENS, BISHOPS, ROOKS, KNIGHTS).exists(piecesLeft(_) != 0)
+      count > 0
 
     def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
-      this(Array(kings, queens, bishops, rooks, knights), List())
+      this(Array(kings, queens, bishops, rooks, knights), List(), kings + queens + bishops + rooks + knights)
 
-    def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard)
+    def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
 
     def changePiecesLeft(f: (Array[Int] => Array[Int])): PieceState =
-      new PieceState(f(piecesLeft), piecesOnTheBoard)
+      new PieceState(f(piecesLeft), piecesOnTheBoard, count - 1)
   }
 
   //TODO: rename

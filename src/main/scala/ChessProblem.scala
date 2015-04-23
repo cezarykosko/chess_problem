@@ -38,6 +38,13 @@ object ChessProblem {
       new PieceState(f(piecesLeft), piecesOnTheBoard)
   }
 
+  //TODO: rename
+  private def isAfter(piece1: Piece, piece2: Piece) : Boolean =
+    piece1.getClass == piece2.getClass && isAfter(piece1.coords, piece2.coords)
+
+  private def isAfter(coord1: (Int, Int), coord2: (Int, Int)) : Boolean =
+    coord1._1 > coord2._1 || (coord1._1 == coord2._1 && coord1._2 > coord2._2)
+
   private def remove(n: String) = (m: Map[String,Int]) => m + (n -> (m(n) - 1))
 
   private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPiece: Piece) : Int = {
@@ -45,7 +52,7 @@ object ChessProblem {
       coords <- fields
     } yield {
         newPiece.coords = coords
-        if (state.piecesOnTheBoard exists(newPiece.beats(_)))
+        if (state.piecesOnTheBoard exists((p: Piece) => newPiece.beats(p) || isAfter(newPiece, p)))
           0
         else
           backtrack(fields filter (!newPiece.beats(_)), state.addPieceToTheBoard(newPiece))
@@ -54,15 +61,15 @@ object ChessProblem {
   // assuming there's available fields & pieces
   private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState) : Int = {
     if (state.piecesLeft(QUEENS) != 0)
-      place_piece(fields, state changePiecesLeft remove(QUEENS), new Queen) / state.piecesLeft(QUEENS)
+      place_piece(fields, state changePiecesLeft remove(QUEENS), new Queen)
     else if (state.piecesLeft(ROOKS) != 0)
-      place_piece(fields, state changePiecesLeft remove(ROOKS), new Rook) / state.piecesLeft(ROOKS)
+      place_piece(fields, state changePiecesLeft remove(ROOKS), new Rook)
     else if (state.piecesLeft(BISHOPS) != 0)
-      place_piece(fields, state changePiecesLeft remove(BISHOPS), new Bishop) / state.piecesLeft(BISHOPS)
+      place_piece(fields, state changePiecesLeft remove(BISHOPS), new Bishop)
     else if (state.piecesLeft(KINGS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KINGS), new King) / state.piecesLeft(KINGS)
+      place_piece(fields, state changePiecesLeft remove(KINGS), new King)
     else if (state.piecesLeft(KNIGHTS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KNIGHTS), new Knight) / state.piecesLeft(KNIGHTS)
+      place_piece(fields, state changePiecesLeft remove(KNIGHTS), new Knight)
     else
       1
   }

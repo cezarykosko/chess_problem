@@ -67,25 +67,34 @@ object ChessProblem {
       }).sum
   }
 
+  private def getPiece(cat: Int): Piece = {
+    cat match {
+      case KINGS => new King
+      case QUEENS => new Queen
+      case BISHOPS => new Bishop
+      case ROOKS => new Rook
+      case KNIGHTS => new Knight
+    }
+  }
+
   // assuming there's available fields & pieces
   private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    lazy val hlp: ((Int, Piece) => Int) = (cat: Int, p: Piece) => place_piece(fields, state removePieceFromLeft cat, p)
+    lazy val hlp: (Int => Int) = (cat: Int) => place_piece(fields, state removePieceFromLeft cat, getPiece(cat))
     if (state.piecesLeft(QUEENS) != 0)
-      hlp(QUEENS, new Queen)
+      hlp(QUEENS)
     else if (state.piecesLeft(ROOKS) != 0)
-      hlp(ROOKS, new Rook)
+      hlp(ROOKS)
     else if (state.piecesLeft(BISHOPS) != 0)
-      hlp(BISHOPS, new Bishop)
+      hlp(BISHOPS)
     else if (state.piecesLeft(KINGS) != 0)
-      hlp(KINGS, new King)
+      hlp(KINGS)
     else if (state.piecesLeft(KNIGHTS) != 0)
-      hlp(KNIGHTS, new Knight)
+      hlp(KNIGHTS)
     else
       1
   }
 
   private def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    //println(fields)
     if (!state.anyPiecesLeft())
       1
     else if (fields.isEmpty)

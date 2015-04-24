@@ -35,8 +35,17 @@ object ChessProblem {
 
     def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
 
-    def changePiecesLeft(f: (Array[Int] => Array[Int])): PieceState =
-      new PieceState(f(piecesLeft), piecesOnTheBoard, count - 1) //TODO: incorrect name -> logic
+    private def remove(n: Int) = (m: Array[Int]) => {
+      val nArr = m.clone()
+      nArr(n) -= 1
+      nArr
+    }
+
+    private def changePiecesLeft(f: (Array[Int] => Array[Int])): Array[Int] =
+      f(piecesLeft)
+
+    def removePieceFromLeft(cat: Int) =
+      new PieceState(changePiecesLeft(remove(cat)), piecesOnTheBoard, count - 1)
   }
 
   //TODO: rename
@@ -45,12 +54,6 @@ object ChessProblem {
 
   private def isAfter(coord1: (Int, Int), coord2: (Int, Int)): Boolean =
     coord1._1 > coord2._1 || (coord1._1 == coord2._1 && coord1._2 > coord2._2)
-
-  private def remove(n: Int) = (m: Array[Int]) => {
-    val nArr = m.clone()
-    nArr(n) -= 1
-    nArr
-  }
 
   private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPiece: Piece): Int = {
     (for {
@@ -66,16 +69,17 @@ object ChessProblem {
 
   // assuming there's available fields & pieces
   private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState): Int = {
+    lazy val hlp: ((Int, Piece) => Int) = (cat: Int, p: Piece) => place_piece(fields, state removePieceFromLeft cat, p)
     if (state.piecesLeft(QUEENS) != 0)
-      place_piece(fields, state changePiecesLeft remove(QUEENS), new Queen)
+      hlp(QUEENS, new Queen)
     else if (state.piecesLeft(ROOKS) != 0)
-      place_piece(fields, state changePiecesLeft remove(ROOKS), new Rook)
+      hlp(ROOKS, new Rook)
     else if (state.piecesLeft(BISHOPS) != 0)
-      place_piece(fields, state changePiecesLeft remove(BISHOPS), new Bishop)
+      hlp(BISHOPS, new Bishop)
     else if (state.piecesLeft(KINGS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KINGS), new King)
+      hlp(KINGS, new King)
     else if (state.piecesLeft(KNIGHTS) != 0)
-      place_piece(fields, state changePiecesLeft remove(KNIGHTS), new Knight)
+      hlp(KNIGHTS, new Knight)
     else
       1
   }

@@ -3,7 +3,7 @@ sealed abstract class Piece(var coords: (Int, Int)) {
   // NOTE: assuming a pawn beats its coords
   def beats(coords: (Int, Int)): Boolean
 
-  def beats(pawn: Piece): Boolean = this.beats(pawn.coords)
+  def beats(piece: Piece): Boolean = this.beats(piece.coords)
 
   private final val abs = Math.abs(_: Int)
 

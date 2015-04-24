@@ -41,7 +41,7 @@ object ChessProblem {
 
   //TODO: rename
   private def isAfter(piece1: Piece, piece2: Piece): Boolean =
-    piece1.getClass == piece2.getClass && isAfter(piece1.coords, piece2.coords)
+    piece1.isSameType(piece2) && isAfter(piece1.coords, piece2.coords)
 
   private def isAfter(coord1: (Int, Int), coord2: (Int, Int)): Boolean =
     coord1._1 > coord2._1 || (coord1._1 == coord2._1 && coord1._2 > coord2._2)

@@ -5,6 +5,8 @@ sealed abstract class Piece(var coords: (Int, Int)) {
 
   def beats(piece: Piece): Boolean = this.beats(piece.coords)
 
+  def isSameType(piece: Piece): Boolean = false
+
   private final val abs = Math.abs(_: Int)
 
   protected val distHorizontal = (c: (Int, Int)) => abs(this.coords._1 - c._1)
@@ -21,24 +23,59 @@ sealed abstract class Piece(var coords: (Int, Int)) {
 case class King extends Piece(0, 0) {
   override def beats(coords: (Int, Int)): Boolean =
     Math.max(this.distHorizontal(coords), this.distVertical(coords)) <= 1
+
+  override def isSameType(piece: Piece): Boolean = {
+    piece match {
+      case King() => true
+      case default => false
+    }
+  }
 }
 
 case class Queen extends Piece(0, 0) {
   override def beats(coords: (Int, Int)): Boolean =
     diagonalBeats(coords) || straightBeats(coords)
+
+  override def isSameType(piece: Piece): Boolean = {
+    piece match {
+      case Queen() => true
+      case default => false
+    }
+  }
 }
 
 case class Bishop extends Piece(0, 0) {
   override def beats(coords: (Int, Int)) = diagonalBeats(coords)
+
+  override def isSameType(piece: Piece): Boolean = {
+    piece match {
+      case Bishop() => true
+      case default => false
+    }
+  }
 }
 
 case class Rook extends Piece(0, 0) {
   override def beats(coords: (Int, Int)) = straightBeats(coords)
+
+  override def isSameType(piece: Piece): Boolean = {
+    piece match {
+      case Rook() => true
+      case default => false
+    }
+  }
 }
 
 case class Knight extends Piece(0, 0) {
   override def beats(coords: (Int, Int)) = {
     val dists = (this.distHorizontal(coords), this.distVertical(coords))
     dists ==(0, 0) || dists ==(2, 1) || dists ==(1, 2)
+  }
+
+  override def isSameType(piece: Piece): Boolean = {
+    piece match {
+      case Knight() => true
+      case default => false
+    }
   }
 }

@@ -7,7 +7,7 @@ object ChessProblem {
   final private val KNIGHTS = 4
 
   def main(args: Array[String]) = {
-    def read() = Console.readInt()
+    def read() = scala.io.StdIn.readInt()
     val horizontal = read()
     val vertical = read()
     val kings = read()
@@ -16,45 +16,24 @@ object ChessProblem {
     val rooks = read()
     val knights = read()
 
+    val result = backtrack(horizontal, vertical, kings, queens, bishops, rooks, knights)
+    println(result)
+  }
+
+  def backtrack(horizontal: Int, vertical: Int, kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int): Int = {
     lazy val chessboard =
       for {
         i <- 1 to horizontal
         j <- 1 to vertical
       } yield (i, j)
 
-    val result = backtrack(chessboard, new PieceState(kings, queens, bishops, rooks, knights))
-    println(result)
-  }
-
-  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
-    def anyPiecesLeft(): Boolean =
-      count > 0
-
-    def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
-      this(Array(kings, queens, bishops, rooks, knights), List(), kings + queens + bishops + rooks + knights)
-
-    def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
-
-    private def remove(n: Int) = (m: Array[Int]) => {
-      val nArr = m.clone()
-      nArr(n) -= 1
-      nArr
-    }
-
-    private def changePiecesLeft(f: (Array[Int] => Array[Int])): Array[Int] =
-      f(piecesLeft)
-
-    def removePieceFromLeft(cat: Int) =
-      new PieceState(changePiecesLeft(remove(cat)), piecesOnTheBoard, count - 1)
+    backtrack(chessboard, new PieceState(kings, queens, bishops, rooks, knights))
   }
 
   //see if pieces of the same type are placed in lexicographical order on the chessboard
   //(so that we do not count permutations)
   private def arePiecesInOrder(piece1: Piece, piece2: Piece): Boolean =
-    piece1.isSameType(piece2) && isAfter(piece1.coords, piece2.coords)
-
-  private def isAfter(coord1: (Int, Int), coord2: (Int, Int)): Boolean =
-    coord1._1 > coord2._1 || (coord1._1 == coord2._1 && coord1._2 > coord2._2)
+    piece1.isSameType(piece2) && piece1.isAfter(piece2)
 
   private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPiece: Piece): Int = {
     (for {
@@ -102,5 +81,28 @@ object ChessProblem {
       0
     else backtrack_step(fields, state)
   }
+
+  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
+    def anyPiecesLeft(): Boolean =
+      count > 0
+
+    def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
+      this(Array(kings, queens, bishops, rooks, knights), List(), kings + queens + bishops + rooks + knights)
+
+    def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
+
+    def removePieceFromLeft(cat: Int) =
+      new PieceState(changePiecesLeft(remove(cat)), piecesOnTheBoard, count - 1)
+
+    private def remove(n: Int) = (m: Array[Int]) => {
+      val nArr = m.clone()
+      nArr(n) -= 1
+      nArr
+    }
+
+    private def changePiecesLeft(f: (Array[Int] => Array[Int])): Array[Int] =
+      f(piecesLeft)
+  }
+
 }
 

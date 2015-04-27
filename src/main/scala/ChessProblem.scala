@@ -7,6 +7,7 @@ object ChessProblem {
   final private val KNIGHTS = 4
 
   def main(args: Array[String]) = {
+    //assuming each parameter is given in a separate lineg
     def read() = scala.io.StdIn.readInt()
     val horizontal = read()
     val vertical = read()

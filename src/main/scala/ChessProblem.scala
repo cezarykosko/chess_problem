@@ -1,3 +1,5 @@
+import scala.collection.mutable
+
 object ChessProblem {
 
   type Piece = (Int, Int, Int)
@@ -7,6 +9,8 @@ object ChessProblem {
   final private val BISHOPS = 2
   final private val ROOKS = 3
   final private val KNIGHTS = 4
+
+  private var piecesOnTheBoard: mutable.LinkedList[Piece] = new mutable.LinkedList[Piece]()
 
   def main(args: Array[String]) = {
     def read() = Console.readInt()
@@ -26,7 +30,7 @@ object ChessProblem {
 
     val count = kings + queens + bishops + rooks + knights
 
-    val result = backtrack(chessboard, Array(kings, queens, bishops, rooks, knights), count, List())
+    val result = backtrack(chessboard, Array(kings, queens, bishops, rooks, knights), count)
     println(result)
   }
 
@@ -69,7 +73,7 @@ object ChessProblem {
     nArr
   }
 
-  private def place_piece(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, piecesOnTheBoard: List[Piece], pieceType: Int): Int = {
+  private def place_piece(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, pieceType: Int): Int = {
     (for {
       coords <- fields
     } yield {
@@ -77,33 +81,38 @@ object ChessProblem {
 
         if (piecesOnTheBoard exists ((p: Piece) => isAfter(newPiece, p) || beats(newPiece, p))) // || isAfter(newPiece, p)))
           0
-        else
-          backtrack(fields filter (!beats(newPiece, _)), piecesLeft, sparePiecesCount, newPiece :: piecesOnTheBoard)
+        else {
+          piecesOnTheBoard = mutable.LinkedList(newPiece) append piecesOnTheBoard
+          val res = backtrack(fields filter (!beats(newPiece, _)), piecesLeft, sparePiecesCount)
+          piecesOnTheBoard = piecesOnTheBoard.next
+          res
+        }
       }).sum
   }
 
   // assuming there's available fields & pieces
-  private def backtrack_step(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, piecesOnTheBoard: List[Piece]): Int = {
+  private def backtrack_step(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int): Int = {
+    lazy val hlp = (cat: Int) => place_piece(fields, remove(cat)(piecesLeft), sparePiecesCount - 1, cat)
     if (piecesLeft(QUEENS) != 0)
-      place_piece(fields, remove(QUEENS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, QUEENS)
+      hlp(QUEENS)
     else if (piecesLeft(ROOKS) != 0)
-      place_piece(fields, remove(ROOKS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, ROOKS)
+      hlp(ROOKS)
     else if (piecesLeft(BISHOPS) != 0)
-      place_piece(fields, remove(BISHOPS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, BISHOPS)
+      hlp(BISHOPS)
     else if (piecesLeft(KINGS) != 0)
-      place_piece(fields, remove(KINGS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, KINGS)
+      hlp(KINGS)
     else if (piecesLeft(KNIGHTS) != 0)
-      place_piece(fields, remove(KNIGHTS)(piecesLeft), sparePiecesCount - 1, piecesOnTheBoard, KNIGHTS)
+      hlp(KNIGHTS)
     else
       1
   }
 
-  private def backtrack(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int, piecesOnTheBoard: List[Piece]): Int = {
+  private def backtrack(fields: Seq[(Int, Int)], piecesLeft: Array[Int], sparePiecesCount: Int): Int = {
     if (sparePiecesCount == 0)
       1
     //else if (fields.isEmpty)
     //  0
-    else backtrack_step(fields, piecesLeft, sparePiecesCount, piecesOnTheBoard)
+    else backtrack_step(fields, piecesLeft, sparePiecesCount)
   }
 }
 

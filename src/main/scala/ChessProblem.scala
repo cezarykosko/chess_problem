@@ -9,12 +9,19 @@ object ChessProblem {
   def main(args: Array[String]) = {
     //assuming each parameter is given in a separate lineg
     def read() = scala.io.StdIn.readInt()
+    println("\nNumber of columns:")
     val horizontal = read()
+    println("\nNumber of rows:")
     val vertical = read()
+    println("\nNumber of kings:")
     val kings = read()
+    println("\nNumber of queens:")
     val queens = read()
+    println("\nNumber of bishops:")
     val bishops = read()
+    println("\nNumber of rooks:")
     val rooks = read()
+    println("\nNumber of knights:")
     val knights = read()
 
     val result = backtrack(horizontal, vertical, kings, queens, bishops, rooks, knights)
@@ -34,13 +41,13 @@ object ChessProblem {
   //see if pieces of the same type are placed in lexicographical order on the chessboard
   //(so that we do not count permutations)
   private def arePiecesInOrder(piece1: Piece, piece2: Piece): Boolean =
-    piece1.isSameType(piece2) && piece1.isAfter(piece2)
+    piece1.isSameCategory(piece2) && piece1.isAfter(piece2)
 
-  private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPiece: Piece): Int = {
+  private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: Int): Int = {
     (for {
       coords <- fields
     } yield {
-        newPiece.coords = coords
+        val newPiece = getPiece(newPieceCat, coords)
         if (state.piecesOnTheBoard exists ((p: Piece) => newPiece.beats(p) || arePiecesInOrder(newPiece, p)))
           0
         else
@@ -48,19 +55,19 @@ object ChessProblem {
       }).sum
   }
 
-  private def getPiece(cat: Int): Piece = {
+  private def getPiece(cat: Int, coords: (Int, Int)): Piece = {
     cat match {
-      case KINGS => new King
-      case QUEENS => new Queen
-      case BISHOPS => new Bishop
-      case ROOKS => new Rook
-      case KNIGHTS => new Knight
+      case KINGS => King(coords)
+      case QUEENS => Queen(coords)
+      case BISHOPS => Bishop(coords)
+      case ROOKS => Rook(coords)
+      case KNIGHTS => Knight(coords)
     }
   }
 
   // assuming there's available fields & pieces
   private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    lazy val hlp: (Int => Int) = (cat: Int) => place_piece(fields, state removePieceFromLeft cat, getPiece(cat))
+    lazy val hlp: (Int => Int) = (cat: Int) => place_piece(fields, state removePieceFromLeft cat, cat)
     if (state.piecesLeft(QUEENS) != 0)
       hlp(QUEENS)
     else if (state.piecesLeft(ROOKS) != 0)

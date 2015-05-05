@@ -39,16 +39,15 @@ object ChessProblem {
         if (state.piecesOnTheBoard exists ((p: Piece) => newPiece.beats(p) || arePiecesInOrder(newPiece, p)))
           0
         else
-          backtrack(fields filter (!newPiece.beats(_)), state.addPieceToTheBoard(newPiece))
-    })
+          backtrack(fields filter (!newPiece.beats(_)), state.addPieceToTheBoard(newPiece))})
       .sum
 
   private def stateToNextCategory(state: PieceState): Option[PieceCategory] =
     List(Category.QUEEN,
-      Category.ROOK,
-      Category.BISHOP,
-      Category.KING,
-      Category.KNIGHT)
+         Category.ROOK,
+         Category.BISHOP,
+         Category.KING,
+         Category.KNIGHT)
       .find(state.piecesLeft(_) != 0)
 
   // assuming there's available fields & pieces
@@ -70,28 +69,30 @@ object ChessProblem {
       0
     else backtrackStep(fields, state)
 
-  class PieceState(val piecesLeft: Map[Piece.Category.PieceCategory, Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
+  class PieceState(val piecesLeft: Map[Piece.Category.PieceCategory, Int],
+                   val piecesOnTheBoard: List[Piece] = List(),
+                   count: Int) {
     def anyPiecesLeft(): Boolean =
       count > 0
 
     def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
       this(Map(Category.KING -> kings,
-        Category.QUEEN -> queens,
-        Category.BISHOP -> bishops,
-        Category.ROOK -> rooks,
-        Category.KNIGHT -> knights),
-        List(),
-        kings + queens + bishops + rooks + knights)
+               Category.QUEEN -> queens,
+               Category.BISHOP -> bishops,
+               Category.ROOK -> rooks,
+               Category.KNIGHT -> knights),
+           List(),
+           kings + queens + bishops + rooks + knights)
 
     def addPieceToTheBoard(piece: Piece): PieceState =
       new PieceState(piecesLeft,
-        piece :: piecesOnTheBoard,
-        count)
+                     piece :: piecesOnTheBoard,
+                     count)
 
     def removePieceFromLeft(cat: PieceCategory) =
       new PieceState(changePiecesLeft(decreaseCountOfCategory(cat)),
-        piecesOnTheBoard,
-        count - 1)
+                     piecesOnTheBoard,
+                     count - 1)
 
     private def decreaseCountOfCategory(n: PieceCategory) = (m: Map[PieceCategory, Int]) => {
       m + (n -> (m(n) - 1))

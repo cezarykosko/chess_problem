@@ -90,7 +90,7 @@ case class Knight(override val coords: (Int, Int)) extends Piece {
 
   override def beats(coords: (Int, Int)) = {
     val dists = (this.distHorizontal(this.coords, coords),
-      this.distVertical(this.coords, coords))
+                 this.distVertical(this.coords, coords))
     List((0, 0), (1, 2), (2, 1)) contains dists
   }
 }

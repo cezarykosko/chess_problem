@@ -101,5 +101,4 @@ object ChessProblem {
     private def changePiecesLeft(f: (Map[PieceCategory, Int] => Map[PieceCategory, Int])): Map[PieceCategory, Int] =
       f(piecesLeft)
   }
-
 }

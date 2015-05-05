@@ -4,7 +4,7 @@ import Piece.Category.PieceCategory
 object ChessProblem {
 
   def main(args: Array[String]) = {
-    //assuming each parameter is given in a separate lineg
+    //assuming each parameter is given in a separate line
     def read() = scala.io.StdIn.readInt()
     println("\nNumber of columns:")
     val horizontal = read()

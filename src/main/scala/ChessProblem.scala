@@ -1,10 +1,7 @@
-object ChessProblem {
+import Piece.Category
+import Piece.Category.PieceCategory
 
-  final private val KINGS = 0
-  final private val QUEENS = 1
-  final private val BISHOPS = 2
-  final private val ROOKS = 3
-  final private val KNIGHTS = 4
+object ChessProblem {
 
   def main(args: Array[String]) = {
     //assuming each parameter is given in a separate lineg
@@ -43,7 +40,7 @@ object ChessProblem {
   private def arePiecesInOrder(piece1: Piece, piece2: Piece): Boolean =
     piece1.isSameCategory(piece2) && piece1.isAfter(piece2)
 
-  private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: Int): Int = {
+  private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: PieceCategory): Int = {
     (for {
       coords <- fields
     } yield {
@@ -55,29 +52,29 @@ object ChessProblem {
       }).sum
   }
 
-  private def getPiece(cat: Int, coords: (Int, Int)): Piece = {
+  private def getPiece(cat: PieceCategory, coords: (Int, Int)): Piece = {
     cat match {
-      case KINGS => King(coords)
-      case QUEENS => Queen(coords)
-      case BISHOPS => Bishop(coords)
-      case ROOKS => Rook(coords)
-      case KNIGHTS => Knight(coords)
+      case Category.KING => King(coords)
+      case Category.QUEEN => Queen(coords)
+      case Category.BISHOP => Bishop(coords)
+      case Category.ROOK => Rook(coords)
+      case Category.KNIGHT => Knight(coords)
     }
   }
 
   // assuming there's available fields & pieces
   private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    lazy val hlp: (Int => Int) = (cat: Int) => place_piece(fields, state removePieceFromLeft cat, cat)
-    if (state.piecesLeft(QUEENS) != 0)
-      hlp(QUEENS)
-    else if (state.piecesLeft(ROOKS) != 0)
-      hlp(ROOKS)
-    else if (state.piecesLeft(BISHOPS) != 0)
-      hlp(BISHOPS)
-    else if (state.piecesLeft(KINGS) != 0)
-      hlp(KINGS)
-    else if (state.piecesLeft(KNIGHTS) != 0)
-      hlp(KNIGHTS)
+    lazy val hlp: (PieceCategory => Int) = (cat: PieceCategory) => place_piece(fields, state removePieceFromLeft cat, cat)
+    if (state.piecesLeft(Category.QUEEN) != 0)
+      hlp(Category.QUEEN)
+    else if (state.piecesLeft(Category.ROOK) != 0)
+      hlp(Category.ROOK)
+    else if (state.piecesLeft(Category.BISHOP) != 0)
+      hlp(Category.BISHOP)
+    else if (state.piecesLeft(Category.KING) != 0)
+      hlp(Category.KING)
+    else if (state.piecesLeft(Category.KNIGHT) != 0)
+      hlp(Category.KNIGHT)
     else
       1
   }
@@ -90,25 +87,24 @@ object ChessProblem {
     else backtrack_step(fields, state)
   }
 
-  class PieceState(val piecesLeft: Array[Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
+  class PieceState(val piecesLeft: Map[Piece.Category.PieceCategory, Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {
     def anyPiecesLeft(): Boolean =
       count > 0
 
     def this(kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int) =
-      this(Array(kings, queens, bishops, rooks, knights), List(), kings + queens + bishops + rooks + knights)
+      this(Map(Category.KING -> kings, Category.QUEEN -> queens, Category.BISHOP -> bishops,
+        Category.ROOK -> rooks, Category.KNIGHT -> knights), List(), kings + queens + bishops + rooks + knights)
 
     def addPieceToTheBoard(piece: Piece): PieceState = new PieceState(piecesLeft, piece :: piecesOnTheBoard, count)
 
-    def removePieceFromLeft(cat: Int) =
-      new PieceState(changePiecesLeft(remove(cat)), piecesOnTheBoard, count - 1)
+    def removePieceFromLeft(cat: PieceCategory) =
+      new PieceState(changePiecesLeft(decreaseCountOfCategory(cat)), piecesOnTheBoard, count - 1)
 
-    private def remove(n: Int) = (m: Array[Int]) => {
-      val nArr = m.clone()
-      nArr(n) -= 1
-      nArr
+    private def decreaseCountOfCategory(n: PieceCategory) = (m: Map[PieceCategory, Int]) => {
+      m + (n -> (m(n) - 1))
     }
 
-    private def changePiecesLeft(f: (Array[Int] => Array[Int])): Array[Int] =
+    private def changePiecesLeft(f: (Map[PieceCategory, Int] => Map[PieceCategory, Int])): Map[PieceCategory, Int] =
       f(piecesLeft)
   }
 

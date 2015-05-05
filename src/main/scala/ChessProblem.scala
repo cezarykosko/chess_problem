@@ -1,27 +1,27 @@
 import Piece.Category
 import Piece.Category.PieceCategory
+import scala.io.StdIn.readInt
 
 object ChessProblem {
 
   def main(args: Array[String]) = {
     //assuming each parameter is given in a separate line
-    def read() = scala.io.StdIn.readInt()
-    println("\nNumber of columns:")
-    val horizontal = read()
+    println("Number of columns:")
+    val horizontal = readInt()
     println("\nNumber of rows:")
-    val vertical = read()
+    val vertical = readInt()
     println("\nNumber of kings:")
-    val kings = read()
+    val kings = readInt()
     println("\nNumber of queens:")
-    val queens = read()
+    val queens = readInt()
     println("\nNumber of bishops:")
-    val bishops = read()
+    val bishops = readInt()
     println("\nNumber of rooks:")
-    val rooks = read()
+    val rooks = readInt()
     println("\nNumber of knights:")
-    val knights = read()
+    val knights = readInt()
 
-    val result = backtrack(horizontal, vertical, kings, queens, bishops, rooks, knights)
+    val result = backtrack(genChessboard(horizontal, vertical), new PieceState(kings, queens, bishops, rooks, knights))
     println(result)
   }
 
@@ -59,15 +59,11 @@ object ChessProblem {
       1
   }
 
-  def backtrack(horizontal: Int, vertical: Int, kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int): Int = {
-    lazy val chessboard =
+  def genChessboard(horizontal: Int, vertical: Int): Seq[(Int, Int)] =
       for {
         i <- 1 to horizontal
         j <- 1 to vertical
       } yield (i, j)
-
-    backtrack(chessboard, new PieceState(kings, queens, bishops, rooks, knights))
-  }
 
   def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int = {
     if (!state.anyPiecesLeft())

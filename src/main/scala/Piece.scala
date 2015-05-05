@@ -8,6 +8,16 @@ object Piece {
     val KING, QUEEN, BISHOP, ROOK, KNIGHT = Value
   }
 
+  def Piece(cat: Category.PieceCategory, coords: (Int, Int)): Piece = {
+    cat match {
+      case Category.KING => King(coords)
+      case Category.QUEEN => Queen(coords)
+      case Category.BISHOP => Bishop(coords)
+      case Category.ROOK => Rook(coords)
+      case Category.KNIGHT => Knight(coords)
+    }
+  }
+
 }
 
 sealed abstract class Piece {

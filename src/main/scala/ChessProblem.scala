@@ -25,26 +25,16 @@ object ChessProblem {
     println(result)
   }
 
-  def backtrack(horizontal: Int, vertical: Int, kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int): Int = {
-    lazy val chessboard =
-      for {
-        i <- 1 to horizontal
-        j <- 1 to vertical
-      } yield (i, j)
-
-    backtrack(chessboard, new PieceState(kings, queens, bishops, rooks, knights))
-  }
-
   //see if pieces of the same type are placed in lexicographical order on the chessboard
   //(so that we do not count permutations)
   private def arePiecesInOrder(piece1: Piece, piece2: Piece): Boolean =
     piece1.isSameCategory(piece2) && piece1.isAfter(piece2)
 
-  private def place_piece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: PieceCategory): Int = {
+  private def placePiece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: PieceCategory): Int = {
     (for {
       coords <- fields
     } yield {
-        val newPiece = getPiece(newPieceCat, coords)
+        val newPiece = Piece.Piece(newPieceCat, coords)
         if (state.piecesOnTheBoard exists ((p: Piece) => newPiece.beats(p) || arePiecesInOrder(newPiece, p)))
           0
         else
@@ -52,19 +42,9 @@ object ChessProblem {
       }).sum
   }
 
-  private def getPiece(cat: PieceCategory, coords: (Int, Int)): Piece = {
-    cat match {
-      case Category.KING => King(coords)
-      case Category.QUEEN => Queen(coords)
-      case Category.BISHOP => Bishop(coords)
-      case Category.ROOK => Rook(coords)
-      case Category.KNIGHT => Knight(coords)
-    }
-  }
-
   // assuming there's available fields & pieces
-  private def backtrack_step(fields: Seq[(Int, Int)], state: PieceState): Int = {
-    lazy val hlp: (PieceCategory => Int) = (cat: PieceCategory) => place_piece(fields, state removePieceFromLeft cat, cat)
+  private def backtrackStep(fields: Seq[(Int, Int)], state: PieceState): Int = {
+    lazy val hlp: (PieceCategory => Int) = (cat: PieceCategory) => placePiece(fields, state removePieceFromLeft cat, cat)
     if (state.piecesLeft(Category.QUEEN) != 0)
       hlp(Category.QUEEN)
     else if (state.piecesLeft(Category.ROOK) != 0)
@@ -79,12 +59,22 @@ object ChessProblem {
       1
   }
 
-  private def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int = {
+  def backtrack(horizontal: Int, vertical: Int, kings: Int, queens: Int, bishops: Int, rooks: Int, knights: Int): Int = {
+    lazy val chessboard =
+      for {
+        i <- 1 to horizontal
+        j <- 1 to vertical
+      } yield (i, j)
+
+    backtrack(chessboard, new PieceState(kings, queens, bishops, rooks, knights))
+  }
+
+  def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int = {
     if (!state.anyPiecesLeft())
       1
     else if (fields.isEmpty)
       0
-    else backtrack_step(fields, state)
+    else backtrackStep(fields, state)
   }
 
   class PieceState(val piecesLeft: Map[Piece.Category.PieceCategory, Int], val piecesOnTheBoard: List[Piece] = List(), count: Int) {

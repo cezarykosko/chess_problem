@@ -24,7 +24,7 @@ object ChessProblem {
     val result = backtrack(genChessboard(horizontal, vertical),
       new PieceState(kings, queens, bishops, rooks, knights))
 
-    println(result)
+    println("\n-----------------\n\nPossible placements:" + result)
   }
 
   //see if pieces of the same type are placed in lexicographical order on the chessboard

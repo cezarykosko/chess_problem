@@ -36,7 +36,7 @@ object ChessProblem {
       println("\n-----------------\n\nTotal:" + result)
     } catch {
       case e: IOException =>
-        println("ERROR: File could not be created or written to.")
+        println("ERROR: " + e.getMessage)
     }
     finally output.close()
   }

@@ -1,10 +1,13 @@
+import java.io.{IOException, FileWriter}
+
 import Piece.Category
 import Piece.Category.PieceCategory
-import scala.io.StdIn.readInt
+import scala.io.StdIn.{readInt, readLine}
 
 object ChessProblem {
 
   def main(args: Array[String]) = {
+
     //assuming each parameter is given in a separate line
     println("Number of columns:")
     val horizontal = readInt()
@@ -20,11 +23,22 @@ object ChessProblem {
     val rooks = readInt()
     println("\nNumber of knights:")
     val knights = readInt()
+    println("\nFile name:")
+    val fileName = readLine()
 
-    val result = backtrack(genChessboard(horizontal, vertical),
-      new PieceState(kings, queens, bishops, rooks, knights))
+    val output = new FileWriter(fileName, false)
 
-    println("\n-----------------\n\nPossible placements:" + result)
+    try {
+      val result = backtrack(genChessboard(horizontal, vertical),
+        new PieceState(kings, queens, bishops, rooks, knights),
+        output)
+
+      println("\n-----------------\n\nTotal:" + result)
+    } catch {
+      case e: IOException =>
+        println("ERROR: File could not be created or written to.")
+    }
+    finally output.close()
   }
 
   //see if pieces of the same type are placed in lexicographical order on the chessboard
@@ -32,14 +46,14 @@ object ChessProblem {
   private def arePiecesInOrder(piece1: Piece, piece2: Piece): Boolean =
     piece1.isSameCategory(piece2) && piece1.isAfter(piece2)
 
-  private def placePiece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: PieceCategory): Int =
+  private def placePiece(fields: Seq[(Int, Int)], state: PieceState, newPieceCat: PieceCategory, output: FileWriter): Int =
     fields
       .map((coords: (Int, Int)) => {
-        val newPiece = Piece.Piece(newPieceCat, coords)
+        val newPiece = Piece(newPieceCat, coords)
         if (state.piecesOnTheBoard exists ((p: Piece) => newPiece.beats(p) || arePiecesInOrder(newPiece, p)))
           0
         else
-          backtrack(fields filter (!newPiece.beats(_)), state.addPieceToTheBoard(newPiece))})
+          backtrack(fields filter (!newPiece.beats(_)), state.addPieceToTheBoard(newPiece), output)})
       .sum
 
   private def stateToNextCategory(state: PieceState): Option[PieceCategory] =
@@ -51,10 +65,10 @@ object ChessProblem {
       .find(state.piecesLeft(_) != 0)
 
   // assuming there's available fields & pieces
-  private def backtrackStep(fields: Seq[(Int, Int)], state: PieceState): Int =
+  private def backtrackStep(fields: Seq[(Int, Int)], state: PieceState, output: FileWriter): Int =
     stateToNextCategory(state)
-      .map((cat: PieceCategory) => placePiece(fields, state removePieceFromLeft cat, cat))
-      .getOrElse(1)
+      .map((cat: PieceCategory) => placePiece(fields, state removePieceFromLeft cat, cat, output))
+      .getOrElse(0)
 
   def genChessboard(horizontal: Int, vertical: Int): Seq[(Int, Int)] =
       for {
@@ -62,16 +76,24 @@ object ChessProblem {
         j <- 1 to vertical
       } yield (i, j)
 
-  def backtrack(fields: Seq[(Int, Int)], state: PieceState): Int =
-    if (!state.anyPiecesLeft())
+  def dumpState(pieces: Seq[Piece], output: FileWriter): Unit = {
+    val preppedString = pieces
+                          .map(_.toString())
+                          .mkString(", ")
+    output.write(preppedString + "\n")
+  }
+
+  def backtrack(fields: Seq[(Int, Int)], state: PieceState, output: FileWriter): Int =
+    if (!state.anyPiecesLeft()) {
+      dumpState(state.piecesOnTheBoard, output)
       1
-    else if (fields.isEmpty)
+    } else if (fields.isEmpty)
       0
-    else backtrackStep(fields, state)
+    else backtrackStep(fields, state, output)
 
   class PieceState(val piecesLeft: Map[Piece.Category.PieceCategory, Int],
                    val piecesOnTheBoard: List[Piece] = List(),
-                   count: Int) {
+                   val count: Int) {
     def anyPiecesLeft(): Boolean =
       count > 0
 
@@ -94,9 +116,8 @@ object ChessProblem {
                      piecesOnTheBoard,
                      count - 1)
 
-    private def decreaseCountOfCategory(n: PieceCategory) = (m: Map[PieceCategory, Int]) => {
+    private def decreaseCountOfCategory(n: PieceCategory) = (m: Map[PieceCategory, Int]) =>
       m + (n -> (m(n) - 1))
-    }
 
     private def changePiecesLeft(f: (Map[PieceCategory, Int] => Map[PieceCategory, Int])): Map[PieceCategory, Int] =
       f(piecesLeft)

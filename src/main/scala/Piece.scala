@@ -8,7 +8,7 @@ object Piece {
     val KING, QUEEN, BISHOP, ROOK, KNIGHT = Value
   }
 
-  def Piece(cat: Category.PieceCategory, coords: (Int, Int)): Piece = {
+  def apply(cat: Category.PieceCategory, coords: (Int, Int)): Piece = {
     cat match {
       case Category.KING => King(coords)
       case Category.QUEEN => Queen(coords)
@@ -17,12 +17,21 @@ object Piece {
       case Category.KNIGHT => Knight(coords)
     }
   }
+
 }
 
-sealed abstract class Piece {
+sealed abstract class Piece (protected val coords: (Int, Int),
+                             protected val category: Piece.Category.PieceCategory) {
 
-  protected val coords: (Int, Int)
-  protected val category: Piece.Category.PieceCategory
+  override def toString: String = {
+    category match {
+      case Piece.Category.KING => "King at " + coords
+      case Piece.Category.QUEEN => "Queen at " + coords
+      case Piece.Category.BISHOP => "Bishop at " + coords
+      case Piece.Category.ROOK => "Rook at " + coords
+      case Piece.Category.KNIGHT => "Knight at " + coords
+    }
+  }
 
   // NOTE: assuming a piece beats its own coords
   def beats(coords: (Int, Int)): Boolean
@@ -33,14 +42,11 @@ sealed abstract class Piece {
   def isSameCategory(piece: Piece): Boolean =
     this.category == piece.category
 
-  private final val abs =
-    Math.abs(_: Int)
-
   protected val distHorizontal =
-    (c1: (Int, Int), c2: (Int, Int)) => abs(c1._1 - c2._1)
+    (c1: (Int, Int), c2: (Int, Int)) => (c1._1 - c2._1).abs
 
   protected val distVertical =
-    (c1: (Int, Int), c2: (Int, Int)) => abs(c1._2 - c2._2)
+    (c1: (Int, Int), c2: (Int, Int)) => (c1._2 - c2._2).abs
 
   protected val straightBeats =
     (coords: (Int, Int)) =>
@@ -59,34 +65,29 @@ sealed abstract class Piece {
     isAfter(this.coords, piece.coords)
 }
 
-case class King(override val coords: (Int, Int)) extends Piece {
-  override val category = Piece.Category.KING
+case class King(override val coords: (Int, Int)) extends Piece(coords, Piece.Category.KING) {
 
   override def beats(coords: (Int, Int)): Boolean =
     Math.max(this.distHorizontal(this.coords, coords), this.distVertical(this.coords, coords)) <= 1
 }
 
-case class Queen(override val coords: (Int, Int)) extends Piece {
-  override val category = Piece.Category.QUEEN
+case class Queen(override val coords: (Int, Int)) extends Piece(coords, Piece.Category.QUEEN) {
 
   override def beats(coords: (Int, Int)): Boolean =
     this.diagonalBeats(coords) || this.straightBeats(coords)
 }
 
-case class Bishop(override val coords: (Int, Int)) extends Piece {
-  override val category = Piece.Category.BISHOP
+case class Bishop(override val coords: (Int, Int)) extends Piece(coords, Piece.Category.BISHOP) {
 
   override def beats(coords: (Int, Int)) = diagonalBeats(coords)
 }
 
-case class Rook(override val coords: (Int, Int)) extends Piece {
-  override val category = Piece.Category.ROOK
+case class Rook(override val coords: (Int, Int)) extends Piece(coords, Piece.Category.ROOK) {
 
   override def beats(coords: (Int, Int)) = straightBeats(coords)
 }
 
-case class Knight(override val coords: (Int, Int)) extends Piece {
-  override val category = Piece.Category.KNIGHT
+case class Knight(override val coords: (Int, Int)) extends Piece(coords, Piece.Category.KNIGHT) {
 
   override def beats(coords: (Int, Int)) = {
     val dists = (this.distHorizontal(this.coords, coords),

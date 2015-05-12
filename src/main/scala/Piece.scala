@@ -17,7 +17,6 @@ object Piece {
       case Category.KNIGHT => Knight(coords)
     }
   }
-
 }
 
 sealed abstract class Piece (protected val coords: (Int, Int),

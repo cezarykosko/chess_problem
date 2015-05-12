@@ -51,7 +51,7 @@ sealed abstract class Piece (protected val coords: (Int, Int),
   protected val straightBeats =
     (coords: (Int, Int)) =>
       distHorizontal(this.coords, coords) == 0 ||
-        distVertical(this.coords, coords) == 0
+      distVertical(this.coords, coords) == 0
 
   protected val diagonalBeats =
     (coords: (Int, Int)) =>

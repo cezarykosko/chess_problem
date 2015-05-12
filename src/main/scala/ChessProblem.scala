@@ -1,4 +1,4 @@
-import java.io.{IOException, FileWriter}
+import java.io.{FileNotFoundException, IOException, FileWriter}
 
 import Piece.Category
 import Piece.Category.PieceCategory
@@ -26,19 +26,23 @@ object ChessProblem {
     println("\nFile name:")
     val fileName = readLine()
 
-    val output = new FileWriter(fileName, false)
-
     try {
+      val output = new FileWriter(fileName, false)
+
       val result = backtrack(genChessboard(horizontal, vertical),
         new PieceState(kings, queens, bishops, rooks, knights),
         output)
 
       println("\n-----------------\n\nTotal:" + result)
+
+      output.close()
+
     } catch {
       case e: IOException =>
-        println("ERROR: " + e.getMessage)
+        println("ERROR writing to file: " + e.getMessage)
+      case e: FileNotFoundException =>
+        println("ERROR creating file: " + e.getMessage)
     }
-    finally output.close()
   }
 
   //see if pieces of the same type are placed in lexicographical order on the chessboard

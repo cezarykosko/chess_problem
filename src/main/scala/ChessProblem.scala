@@ -81,10 +81,8 @@ object ChessProblem {
       } yield (i, j)
 
   def dumpState(pieces: Seq[Piece], output: FileWriter): Unit = {
-    val preppedString = pieces
-                          .map(_.toString())
-                          .mkString(", ")
-    output.write(preppedString + "\n")
+    val preppedString = pieces mkString ", "
+    output write preppedString + "\n"
   }
 
   def backtrack(fields: Seq[(Int, Int)], state: PieceState, output: FileWriter): Int =
